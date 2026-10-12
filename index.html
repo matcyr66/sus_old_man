@@ -1,0 +1,261 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Old Man</title>
+
+    <style>
+        body {
+            background: #111111;
+            color: #ded5c5;
+            font-family: Georgia, serif;
+            max-width: 650px;
+            margin: 80px auto;
+            padding: 20px;
+            line-height: 1.8;
+        }
+
+        h1 {
+            color: #a33b3b;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+
+        #story {
+            min-height: 140px;
+            white-space: pre-wrap;
+            font-size: 18px;
+            margin: 35px 0;
+        }
+
+        input {
+            background: #222;
+            color: #eee;
+            border: 1px solid #665555;
+            padding: 12px;
+            font-size: 16px;
+            width: 65%;
+        }
+
+        button {
+            background: #612626;
+            color: white;
+            border: 1px solid #995555;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 12px;
+        }
+
+        button:hover {
+            background: #853333;
+        }
+
+        .success {
+            color: #55cc77;
+        }
+
+        .failure {
+            color: #ff5555;
+        }
+
+        #controls {
+            border-top: 1px solid #443333;
+            padding-top: 20px;
+        }
+
+        footer {
+            color: #777;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 70px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>THE OLD MAN</h1>
+
+    <div id="story"></div>
+    <div id="controls"></div>
+
+    <footer>A D20 HORROR EXPERIMENT</footer>
+
+    <script>
+        const story = document.getElementById("story");
+        const controls = document.getElementById("controls");
+
+        const strDC = 12;
+        const dexDC = 15;
+        const conDC = 13;
+
+        let chosenSave;
+        let chosenDC;
+
+        function showContinue(message, nextAction) {
+            story.textContent = message;
+            controls.replaceChildren();
+
+            const button = document.createElement("button");
+            button.textContent = "Continue";
+            button.onclick = nextAction;
+
+            controls.appendChild(button);
+        }
+
+        function showChoice() {
+            story.textContent =
+                '"It appears you are in a little bit of a predicament... ' +
+                'here, let me help you!" - The old man reaches out his hand.';
+
+            controls.replaceChildren();
+
+            const label = document.createElement("p");
+            label.textContent = "Do you take his hand? Yes / No";
+
+            const answer = document.createElement("input");
+            answer.placeholder = "Type anything...";
+            answer.setAttribute("aria-label", "Your answer");
+
+            const submit = document.createElement("button");
+            submit.textContent = "Submit";
+
+            function chooseAnswer() {
+                const choice = answer.value.toLowerCase().trim();
+
+                if (choice === "") {
+                    story.textContent = "The old man waits for your answer...";
+                    answer.focus();
+                    return;
+                }
+
+                if (choice === "yes") {
+                    chosenSave = "Constitution";
+                    chosenDC = conDC;
+
+                    showContinue(
+                        "You grab the old man's hand... and suddenly... " +
+                        "you feel weak! Roll for Constitution!",
+                        rollDice
+                    );
+
+                } else if (choice === "no") {
+                    chosenSave = "Dexterity";
+                    chosenDC = dexDC;
+
+                    showContinue(
+                        '"Those youngsters these days...! I see I got to ' +
+                        'teach you some manners!" - The old man attempts ' +
+                        'to swing a dagger into your ribs. Roll for Dexterity!',
+                        rollDice
+                    );
+
+                } else {
+                    chosenSave = "Strength";
+                    chosenDC = strDC;
+
+                    showContinue(
+                        '"You think you are a smart fella, eh? I\'ll show ya!" ' +
+                        '- The old man swings his dagger. You block it at ' +
+                        'the last moment. Make a Strength save!',
+                        rollDice
+                    );
+                }
+            }
+
+            submit.onclick = chooseAnswer;
+
+            answer.addEventListener("keydown", function(event) {
+                if (event.key === "Enter") {
+                    chooseAnswer();
+                }
+            });
+
+            controls.append(label, answer, submit);
+            answer.focus();
+        }
+
+        function rollDice() {
+            story.textContent = "Press the button to roll your D20...";
+            controls.replaceChildren();
+
+            const button = document.createElement("button");
+            button.textContent = "Roll D20 🎲";
+
+            button.onclick = function() {
+                const roll = Math.floor(Math.random() * 20) + 1;
+
+                if (roll >= chosenDC) {
+                    story.textContent =
+                        "You rolled a " + roll +
+                        "! (DC " + chosenDC + ")\n\nDC CHECK... SUCCESS!\n\n";
+
+                    story.className = "success";
+
+                    if (chosenSave === "Constitution") {
+                        story.textContent +=
+                            "You see black eye sockets and a mouth on the " +
+                            "man's face. He is trying to suck the life out of you!";
+                    } else if (chosenSave === "Dexterity") {
+                        story.textContent +=
+                            "You swiftly dodge and knock the dagger out of " +
+                            "his hands. He is now disarmed, ha!";
+                    } else {
+                        story.textContent +=
+                            "You successfully take control of the blade " +
+                            "and twist it. It is in your possession now. " +
+                            "You point at the old man.";
+                    }
+
+                } else {
+                    story.textContent =
+                        "You rolled a " + roll +
+                        "! (DC " + chosenDC + ")\n\nDC CHECK... FAIL!\n\n";
+
+                    story.className = "failure";
+
+                    if (chosenSave === "Constitution") {
+                        story.textContent +=
+                            "You start to feel lightheaded, as if your soul " +
+                            "were leaving your body. Suddenly, you pass out.";
+                    } else if (chosenSave === "Dexterity") {
+                        story.textContent +=
+                            "You feel a sharp pain in the side of your torso. " +
+                            "There's a metallic taste in your mouth, and you " +
+                            "drop to the floor.";
+                    } else {
+                        story.textContent +=
+                            "You struggle against the old man. He is " +
+                            "surprisingly strong! Something isn't right... " +
+                            "before you realise it, his pitch-dark eyes are " +
+                            "staring deep into your soul. You black out.";
+                    }
+                }
+
+                controls.replaceChildren();
+
+                const restart = document.createElement("button");
+                restart.textContent = "Play Again";
+                restart.onclick = startGame;
+
+                controls.appendChild(restart);
+            };
+
+            controls.appendChild(button);
+        }
+
+        function startGame() {
+            story.className = "";
+
+            showContinue(
+                '"Welcome, traveller...!" - An old man welcomes you.',
+                showChoice
+            );
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
