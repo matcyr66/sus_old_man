@@ -132,7 +132,6 @@
         let stage = 0;
         let selectedChoice = "";
         let currentDC = 0;
-        let saveType = "";
         let successText = "";
         let failureText = "";
 
@@ -146,7 +145,7 @@
         function showContinue() {
             if (stage === 0) {
                 story.innerHTML = `
-                    <p>"It appears you are in a little bit of a predicament... 
+                    <p>"It appears you are in a little bit of a predicament...
                     here, let me help you!" - The old man reaches out his hand.</p>
                 `;
 
@@ -173,13 +172,11 @@
 
             if (selectedChoice === "yes") {
                 currentDC = 13;
-                saveType = "constitution";
 
                 story.innerHTML = `
-                    <p>You grab the old man's hand... and suddenly... 
+                    <p>You grab the old man's hand... and suddenly...
                     you feel weak!</p>
                     <p>Roll for constitution!</p>
-                    <p class="muted">Constitution saving throw — DC ${currentDC}</p>
                 `;
 
                 successText = `You notice something is off. His eyes are pitch black. His figure is shifting in dark smoke. He is a Wrath. He tried to consume your life force.`;
@@ -188,13 +185,11 @@
 
             } else if (selectedChoice === "no") {
                 currentDC = 15;
-                saveType = "dexterity";
 
                 story.innerHTML = `
-                    <p>"Those youngsters these days...! I see I got to teach you some manners!" 
+                    <p>"Those youngsters these days...! I see I got to teach you some manners!"
                     - The old man attempts to swing a dagger into your ribs.</p>
                     <p>Roll for dexterity!</p>
-                    <p class="muted">Dexterity saving throw — DC ${currentDC}</p>
                 `;
 
                 successText = `You swiftly dodge and knock the dagger out of his hands. He is now disarmed, ha!`;
@@ -203,13 +198,11 @@
 
             } else {
                 currentDC = 12;
-                saveType = "strength";
 
                 story.innerHTML = `
-                    <p>"You think you are a smart fella, eh? I'll show ya!" 
+                    <p>"You think you are a smart fella, eh? I'll show ya!"
                     - You see the old man swing the dagger that you block at the last moment.</p>
                     <p>Make a strength save.</p>
-                    <p class="muted">Strength saving throw — DC ${currentDC}</p>
                 `;
 
                 successText = `You successfully take control of the blade and twist it. It is in your possession now. You point at the old man.`;
@@ -232,7 +225,7 @@
             const narrative = success ? successText : failureText;
 
             story.innerHTML = `
-                <p><strong>Your D20 roll:</strong> ${roll}</p>
+                <p>Your D20 roll: ${roll}</p>
                 <p class="${resultClass}">${resultText}</p>
                 <p>${narrative}</p>
             `;
@@ -245,7 +238,6 @@
             stage = 0;
             selectedChoice = "";
             currentDC = 0;
-            saveType = "";
             successText = "";
             failureText = "";
             choiceInput.value = "";
@@ -261,7 +253,10 @@
         }
 
         choiceInput.addEventListener("keydown", function(event) {
-            if (event.key === "Enter" && !choiceControls.classList.contains("hidden")) {
+            if (
+                event.key === "Enter" &&
+                !choiceControls.classList.contains("hidden")
+            ) {
                 makeChoice();
             }
         });
