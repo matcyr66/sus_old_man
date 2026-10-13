@@ -3,8 +3,12 @@ import random
 def cont():
     input("\033[90mPress Enter to continue...\033[0m")
 
-def roll():
+def wait_to_roll():
     input("\033[90mPress Enter to roll...\033[0m")
+
+def roll_d20():
+    result = random.randint(1, 20)
+    return result
 
 str_dc = 12
 dex_dc = 15
@@ -17,12 +21,12 @@ cont()
 take_hand = input("Do you take his hand? Yes / No\n").lower().strip()
 if take_hand == "yes":
     print("You grab the old man's hand... and suddenly... you feel weak! Roll for constitution!")
-    roll()
-    roll1 = random.randint(1,20)
-    print(roll1)
-    if roll1 >= con_dc:
+    wait_to_roll()
+    roll_result = roll_d20()
+    print(roll_result)
+    if roll_result >= con_dc:
         print("\033[32mDC CHECK... SUCCESS!\033[0m")
-        print("You notice something is off. His eyes are pitch black. His figure is shifting in dark smoke. He is a Wrath."
+        print("You notice something is off. His eyes are pitch black. His figure is shifting in dark smoke. He is a Wrath. "
               "He tried to consume your life force.")
     else:
         print("\033[31mDC CHECK... FAIL!\033[0m")
@@ -30,10 +34,10 @@ if take_hand == "yes":
 elif take_hand == "no":
     print('"Those youngsters these days...! I see I got to teach you some manners!" - The old man attempts '
           "to swing a dagger into your ribs. Roll for dexterity!")
-    roll()
-    roll2 = random.randint(1,20)
-    print(roll2)
-    if roll2 >= dex_dc:
+    wait_to_roll()
+    roll_result = roll_d20()
+    print(roll_result)
+    if roll_result >= dex_dc:
         print("\033[32mDC CHECK... SUCCESS!\033[0m")
         print("You swiftly dodge and knock the dagger out of his hands. He is now disarmed, ha!")
     else:
@@ -42,12 +46,13 @@ elif take_hand == "no":
 else:
     print('"You think you are a smart fella, eh? I\'ll show ya!" - You see the old man swing the dagger that '
           'you block last moment. Make a strength save.')
-    roll()
-    roll3 = random.randint(1,20)
-    print(roll3)
-    if roll3 >= str_dc:
+    wait_to_roll()
+    roll_result = roll_d20()
+    print(roll_result)
+    if roll_result >= str_dc:
         print("\033[32mDC CHECK... SUCCESS!\033[0m")
-        print("You successfully take control of the blade and twist it. It is in your possession now. You point at the old man.")
+        print("You successfully take control of the blade and twist it. It is in your possession now. "
+              "You point it at the old man.")
     else:
         print("\033[31mDC CHECK... FAIL!\033[0m")
         print("You struggle against the old man. He is surprisingly strong! Something isn't right... before you realise, "
