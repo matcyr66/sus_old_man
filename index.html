@@ -37,6 +37,8 @@
             padding: 12px;
             font-size: 16px;
             width: 65%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         button {
@@ -95,6 +97,7 @@
         let chosenDC;
 
         function showContinue(message, nextAction) {
+            story.className = "";
             story.textContent = message;
             controls.replaceChildren();
 
@@ -106,6 +109,7 @@
         }
 
         function showChoice() {
+            story.className = "";
             story.textContent =
                 '"It appears you are in a little bit of a predicament... ' +
                 'here, let me help you!" - The old man reaches out his hand.';
@@ -158,8 +162,8 @@
 
                     showContinue(
                         '"You think you are a smart fella, eh? I\'ll show ya!" ' +
-                        '- The old man swings his dagger. You block it at ' +
-                        'the last moment. Make a Strength save!',
+                        '- You see the old man swing his dagger, which ' +
+                        'you block at the last moment. Make a Strength save.',
                         rollDice
                     );
                 }
@@ -178,6 +182,7 @@
         }
 
         function rollDice() {
+            story.className = "";
             story.textContent = "Press the button to roll your D20...";
             controls.replaceChildren();
 
@@ -186,51 +191,51 @@
 
             button.onclick = function() {
                 const roll = Math.floor(Math.random() * 20) + 1;
+                const success = roll >= chosenDC;
 
-                if (roll >= chosenDC) {
-                    story.textContent =
-                        "You rolled a " + roll +
-                        "! (DC " + chosenDC + ")\n\nDC CHECK... SUCCESS!\n\n";
+                story.className = success ? "success" : "failure";
+                story.textContent =
+                    "You rolled a " + roll +
+                    "! (DC " + chosenDC + ")\n\n" +
+                    (success ? "DC CHECK... SUCCESS!\n\n" : "DC CHECK... FAIL!\n\n");
 
-                    story.className = "success";
-
-                    if (chosenSave === "Constitution") {
+                if (chosenSave === "Constitution") {
+                    if (success) {
                         story.textContent +=
-                            "You see black eye sockets and a mouth on the " +
-                            "man's face. He is trying to suck the life out of you!";
-                    } else if (chosenSave === "Dexterity") {
-                        story.textContent +=
-                            "You swiftly dodge and knock the dagger out of " +
-                            "his hands. He is now disarmed, ha!";
+                            "You notice something is off. His eyes are " +
+                            "pitch black. His figure is shifting in dark " +
+                            "smoke. He is a Wrath. He tried to consume " +
+                            "your life force.";
                     } else {
+                        story.textContent +=
+                            "You start to feel lightheaded and as if your " +
+                            "soul was leaving your body. Suddenly, you pass out.";
+                    }
+
+                } else if (chosenSave === "Dexterity") {
+                    if (success) {
+                        story.textContent +=
+                            "You swiftly dodge and knock the dagger out " +
+                            "of his hands. He is now disarmed, ha!";
+                    } else {
+                        story.textContent +=
+                            "You feel a sharp pain in the side of your torso. " +
+                            "There's a metallic taste in your mouth, and " +
+                            "you drop to the floor.";
+                    }
+
+                } else {
+                    if (success) {
                         story.textContent +=
                             "You successfully take control of the blade " +
                             "and twist it. It is in your possession now. " +
                             "You point at the old man.";
-                    }
-
-                } else {
-                    story.textContent =
-                        "You rolled a " + roll +
-                        "! (DC " + chosenDC + ")\n\nDC CHECK... FAIL!\n\n";
-
-                    story.className = "failure";
-
-                    if (chosenSave === "Constitution") {
-                        story.textContent +=
-                            "You start to feel lightheaded, as if your soul " +
-                            "were leaving your body. Suddenly, you pass out.";
-                    } else if (chosenSave === "Dexterity") {
-                        story.textContent +=
-                            "You feel a sharp pain in the side of your torso. " +
-                            "There's a metallic taste in your mouth, and you " +
-                            "drop to the floor.";
                     } else {
                         story.textContent +=
                             "You struggle against the old man. He is " +
                             "surprisingly strong! Something isn't right... " +
-                            "before you realise it, his pitch-dark eyes are " +
-                            "staring deep into your soul. You black out.";
+                            "before you realise, the pitch black eyes are " +
+                            "staring deep into your soul and you black out.";
                     }
                 }
 
@@ -250,7 +255,7 @@
             story.className = "";
 
             showContinue(
-                '"Welcome, traveller...!" - An old man welcomes you.',
+                '"Welcome traveller...!" - An old man welcomes you.',
                 showChoice
             );
         }
