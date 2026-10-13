@@ -8,71 +8,84 @@
 
     <style>
         body {
-            background: #111111;
-            color: #ded5c5;
+            background-color: #111111;
+            color: #e0e0e0;
             font-family: Georgia, serif;
-            max-width: 650px;
-            margin: 80px auto;
+            max-width: 750px;
+            margin: 60px auto;
             padding: 20px;
-            line-height: 1.8;
+            line-height: 1.7;
         }
 
         h1 {
-            color: #a33b3b;
+            color: #b22222;
             text-align: center;
             letter-spacing: 4px;
+            margin-bottom: 35px;
         }
 
         #story {
-            min-height: 140px;
-            white-space: pre-wrap;
-            font-size: 18px;
-            margin: 35px 0;
-        }
-
-        input {
-            background: #222;
-            color: #eee;
-            border: 1px solid #665555;
-            padding: 12px;
-            font-size: 16px;
-            width: 65%;
-            max-width: 100%;
-            box-sizing: border-box;
+            background-color: #1b1b1b;
+            border: 1px solid #383838;
+            border-radius: 8px;
+            padding: 25px;
+            min-height: 180px;
         }
 
         button {
-            background: #612626;
+            background-color: #6b1717;
             color: white;
-            border: 1px solid #995555;
-            padding: 12px 18px;
+            border: 1px solid #9c3434;
+            padding: 11px 18px;
+            margin: 12px 8px 0 0;
+            border-radius: 5px;
             cursor: pointer;
             font-size: 15px;
-            margin-top: 12px;
         }
 
         button:hover {
-            background: #853333;
+            background-color: #922222;
+        }
+
+        input {
+            background-color: #252525;
+            color: white;
+            border: 1px solid #777;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 15px;
+            margin-top: 10px;
+            max-width: 90%;
         }
 
         .success {
-            color: #55cc77;
+            color: #32cd32;
+            font-weight: bold;
         }
 
         .failure {
-            color: #ff5555;
+            color: #ff4040;
+            font-weight: bold;
+        }
+
+        .muted {
+            color: #999999;
+            font-style: italic;
         }
 
         #controls {
-            border-top: 1px solid #443333;
-            padding-top: 20px;
+            margin-top: 15px;
+        }
+
+        .hidden {
+            display: none;
         }
 
         footer {
-            color: #777;
-            font-size: 12px;
             text-align: center;
-            margin-top: 70px;
+            color: #666666;
+            font-size: 12px;
+            margin-top: 35px;
         }
     </style>
 </head>
@@ -80,187 +93,178 @@
 <body>
     <h1>THE OLD MAN</h1>
 
-    <div id="story"></div>
-    <div id="controls"></div>
+    <div id="story">
+        <p>"Welcome traveller...!" - An old man welcomes you.</p>
+    </div>
 
-    <footer>A D20 HORROR EXPERIMENT</footer>
+    <div id="controls">
+        <button id="continueButton" onclick="showContinue()">
+            Continue
+        </button>
+
+        <div id="choiceControls" class="hidden">
+            <p>Do you take his hand? Yes / No</p>
+
+            <input
+                type="text"
+                id="choiceInput"
+                placeholder="Enter your choice..."
+                autocomplete="off"
+            >
+
+            <button onclick="makeChoice()">Submit</button>
+        </div>
+
+        <button id="rollButton" class="hidden" onclick="rollDice()">
+            Roll D20
+        </button>
+
+        <button id="restartButton" class="hidden" onclick="startGame()">
+            Play Again
+        </button>
+    </div>
+
+    <footer>
+        A little D&D-inspired experiment...
+    </footer>
 
     <script>
+        let stage = 0;
+        let selectedChoice = "";
+        let currentDC = 0;
+        let saveType = "";
+        let successText = "";
+        let failureText = "";
+
         const story = document.getElementById("story");
-        const controls = document.getElementById("controls");
+        const continueButton = document.getElementById("continueButton");
+        const choiceControls = document.getElementById("choiceControls");
+        const rollButton = document.getElementById("rollButton");
+        const restartButton = document.getElementById("restartButton");
+        const choiceInput = document.getElementById("choiceInput");
 
-        const strDC = 12;
-        const dexDC = 15;
-        const conDC = 13;
+        function showContinue() {
+            if (stage === 0) {
+                story.innerHTML = `
+                    <p>"It appears you are in a little bit of a predicament... 
+                    here, let me help you!" - The old man reaches out his hand.</p>
+                `;
 
-        let chosenSave;
-        let chosenDC;
-
-        function showContinue(message, nextAction) {
-            story.className = "";
-            story.textContent = message;
-            controls.replaceChildren();
-
-            const button = document.createElement("button");
-            button.textContent = "Continue";
-            button.onclick = nextAction;
-
-            controls.appendChild(button);
-        }
-
-        function showChoice() {
-            story.className = "";
-            story.textContent =
-                '"It appears you are in a little bit of a predicament... ' +
-                'here, let me help you!" - The old man reaches out his hand.';
-
-            controls.replaceChildren();
-
-            const label = document.createElement("p");
-            label.textContent = "Do you take his hand? Yes / No";
-
-            const answer = document.createElement("input");
-            answer.placeholder = "Type anything...";
-            answer.setAttribute("aria-label", "Your answer");
-
-            const submit = document.createElement("button");
-            submit.textContent = "Submit";
-
-            function chooseAnswer() {
-                const choice = answer.value.toLowerCase().trim();
-
-                if (choice === "") {
-                    story.textContent = "The old man waits for your answer...";
-                    answer.focus();
-                    return;
-                }
-
-                if (choice === "yes") {
-                    chosenSave = "Constitution";
-                    chosenDC = conDC;
-
-                    showContinue(
-                        "You grab the old man's hand... and suddenly... " +
-                        "you feel weak! Roll for Constitution!",
-                        rollDice
-                    );
-
-                } else if (choice === "no") {
-                    chosenSave = "Dexterity";
-                    chosenDC = dexDC;
-
-                    showContinue(
-                        '"Those youngsters these days...! I see I got to ' +
-                        'teach you some manners!" - The old man attempts ' +
-                        'to swing a dagger into your ribs. Roll for Dexterity!',
-                        rollDice
-                    );
-
-                } else {
-                    chosenSave = "Strength";
-                    chosenDC = strDC;
-
-                    showContinue(
-                        '"You think you are a smart fella, eh? I\'ll show ya!" ' +
-                        '- You see the old man swing his dagger, which ' +
-                        'you block at the last moment. Make a Strength save.',
-                        rollDice
-                    );
-                }
+                stage = 1;
             }
 
-            submit.onclick = chooseAnswer;
+            continueButton.classList.add("hidden");
+            choiceControls.classList.remove("hidden");
+            choiceInput.focus();
+        }
 
-            answer.addEventListener("keydown", function(event) {
-                if (event.key === "Enter") {
-                    chooseAnswer();
-                }
-            });
+        function makeChoice() {
+            selectedChoice = choiceInput.value.trim().toLowerCase();
 
-            controls.append(label, answer, submit);
-            answer.focus();
+            if (selectedChoice === "") {
+                story.innerHTML = `
+                    <p>Please enter a choice first...</p>
+                `;
+                choiceInput.focus();
+                return;
+            }
+
+            choiceControls.classList.add("hidden");
+
+            if (selectedChoice === "yes") {
+                currentDC = 13;
+                saveType = "constitution";
+
+                story.innerHTML = `
+                    <p>You grab the old man's hand... and suddenly... 
+                    you feel weak!</p>
+                    <p>Roll for constitution!</p>
+                    <p class="muted">Constitution saving throw — DC ${currentDC}</p>
+                `;
+
+                successText = `You notice something is off. His eyes are pitch black. His figure is shifting in dark smoke. He is a Wrath. He tried to consume your life force.`;
+
+                failureText = `You start to feel lightheaded and as if your soul was leaving your body. Suddenly, you pass out.`;
+
+            } else if (selectedChoice === "no") {
+                currentDC = 15;
+                saveType = "dexterity";
+
+                story.innerHTML = `
+                    <p>"Those youngsters these days...! I see I got to teach you some manners!" 
+                    - The old man attempts to swing a dagger into your ribs.</p>
+                    <p>Roll for dexterity!</p>
+                    <p class="muted">Dexterity saving throw — DC ${currentDC}</p>
+                `;
+
+                successText = `You swiftly dodge and knock the dagger out of his hands. He is now disarmed, ha!`;
+
+                failureText = `You feel a sharp pain in the side of your torso. There's metallic taste in your mouth and you drop to the floor.`;
+
+            } else {
+                currentDC = 12;
+                saveType = "strength";
+
+                story.innerHTML = `
+                    <p>"You think you are a smart fella, eh? I'll show ya!" 
+                    - You see the old man swing the dagger that you block at the last moment.</p>
+                    <p>Make a strength save.</p>
+                    <p class="muted">Strength saving throw — DC ${currentDC}</p>
+                `;
+
+                successText = `You successfully take control of the blade and twist it. It is in your possession now. You point at the old man.`;
+
+                failureText = `You struggle against the old man. He is surprisingly strong! Something isn't right... before you realise, the pitch black eyes are staring deep into your soul and you black out.`;
+            }
+
+            rollButton.classList.remove("hidden");
         }
 
         function rollDice() {
-            story.className = "";
-            story.textContent = "Press the button to roll your D20...";
-            controls.replaceChildren();
+            const roll = Math.floor(Math.random() * 20) + 1;
+            const success = roll >= currentDC;
 
-            const button = document.createElement("button");
-            button.textContent = "Roll D20 🎲";
+            const resultClass = success ? "success" : "failure";
+            const resultText = success
+                ? "DC CHECK... SUCCESS!"
+                : "DC CHECK... FAIL!";
 
-            button.onclick = function() {
-                const roll = Math.floor(Math.random() * 20) + 1;
-                const success = roll >= chosenDC;
+            const narrative = success ? successText : failureText;
 
-                story.className = success ? "success" : "failure";
-                story.textContent =
-                    "You rolled a " + roll +
-                    "! (DC " + chosenDC + ")\n\n" +
-                    (success ? "DC CHECK... SUCCESS!\n\n" : "DC CHECK... FAIL!\n\n");
+            story.innerHTML = `
+                <p><strong>Your D20 roll:</strong> ${roll}</p>
+                <p class="${resultClass}">${resultText}</p>
+                <p>${narrative}</p>
+            `;
 
-                if (chosenSave === "Constitution") {
-                    if (success) {
-                        story.textContent +=
-                            "You notice something is off. His eyes are " +
-                            "pitch black. His figure is shifting in dark " +
-                            "smoke. He is a Wrath. He tried to consume " +
-                            "your life force.";
-                    } else {
-                        story.textContent +=
-                            "You start to feel lightheaded and as if your " +
-                            "soul was leaving your body. Suddenly, you pass out.";
-                    }
-
-                } else if (chosenSave === "Dexterity") {
-                    if (success) {
-                        story.textContent +=
-                            "You swiftly dodge and knock the dagger out " +
-                            "of his hands. He is now disarmed, ha!";
-                    } else {
-                        story.textContent +=
-                            "You feel a sharp pain in the side of your torso. " +
-                            "There's a metallic taste in your mouth, and " +
-                            "you drop to the floor.";
-                    }
-
-                } else {
-                    if (success) {
-                        story.textContent +=
-                            "You successfully take control of the blade " +
-                            "and twist it. It is in your possession now. " +
-                            "You point at the old man.";
-                    } else {
-                        story.textContent +=
-                            "You struggle against the old man. He is " +
-                            "surprisingly strong! Something isn't right... " +
-                            "before you realise, the pitch black eyes are " +
-                            "staring deep into your soul and you black out.";
-                    }
-                }
-
-                controls.replaceChildren();
-
-                const restart = document.createElement("button");
-                restart.textContent = "Play Again";
-                restart.onclick = startGame;
-
-                controls.appendChild(restart);
-            };
-
-            controls.appendChild(button);
+            rollButton.classList.add("hidden");
+            restartButton.classList.remove("hidden");
         }
 
         function startGame() {
-            story.className = "";
+            stage = 0;
+            selectedChoice = "";
+            currentDC = 0;
+            saveType = "";
+            successText = "";
+            failureText = "";
+            choiceInput.value = "";
 
-            showContinue(
-                '"Welcome traveller...!" - An old man welcomes you.',
-                showChoice
-            );
+            story.innerHTML = `
+                <p>"Welcome traveller...!" - An old man welcomes you.</p>
+            `;
+
+            continueButton.classList.remove("hidden");
+            choiceControls.classList.add("hidden");
+            rollButton.classList.add("hidden");
+            restartButton.classList.add("hidden");
         }
 
-        startGame();
+        choiceInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter" && !choiceControls.classList.contains("hidden")) {
+                makeChoice();
+            }
+        });
     </script>
 </body>
 </html>
